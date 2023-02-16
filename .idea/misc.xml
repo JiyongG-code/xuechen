@@ -11,7 +11,14 @@
         <option value="$PROJECT_DIR$/xuecheng-plus-content/xuecheng-plus-content-service/pom.xml" />
         <option value="$PROJECT_DIR$/xuecheng-plus-content/xuecheng-plus-content-api/pom.xml" />
         <option value="$PROJECT_DIR$/xuecheng-plus-generator/pom.xml" />
+        <option value="$PROJECT_DIR$/xuecheng-plus-system/xuecheng-plus-system-model/pom.xml" />
       </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/xuecheng-plus-system/xuecheng-plus-system-api/pom.xml" />
+        <option value="$PROJECT_DIR$/xuecheng-plus-system/xuecheng-plus-system-service/pom.xml" />
+      </set>
     </option>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" project-jdk-name="1.8" project-jdk-type="JavaSDK">

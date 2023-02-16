@@ -8,4 +8,7 @@ Content-Type: application/json
   "publishStatus": ""
 }
 
+### 课程分类 查询
+GET {{content_host}}/content/course-category/tree-nodes
+
 ### 新增查询接口

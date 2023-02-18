@@ -38,4 +38,9 @@ public class TeachplanController {
             teachplanService.deleteTeachplan(courseId);
     }
 
+    @PostMapping("/teachplan/{moveType}/{teachplanId}")
+    public void moveTeachplan(@PathVariable String moveType,@PathVariable Long teachplanId){
+        teachplanService.orderByTeachplan(moveType,teachplanId);
+    }
+
 }

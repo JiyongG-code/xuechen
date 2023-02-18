@@ -10,6 +10,7 @@ import com.xuecheng.content.model.po.Teachplan;
 import com.xuecheng.content.model.po.TeachplanMedia;
 import com.xuecheng.content.service.TeachplanService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -91,5 +92,82 @@ public class TeachplanServiceImpl implements TeachplanService {
 
         }
 
+    }
+
+    @Override
+    public void orderByTeachplan(String moveType, Long teachplanId) {
+        //
+        if (StringUtils.isBlank(moveType)||teachplanId<0){
+            XueChengPlusException.cast("请输入合法参数");
+        }
+        // 获取层级和当前orderby，章节移动和小节移动的处理方式不同
+        Teachplan teachplan = teachplanMapper.selectById(teachplanId);
+        Integer grade = teachplan.getGrade(); //1表示章节，2表示小节
+        Integer orderby = teachplan.getOrderby();
+        // 章节移动是比较同一课程id下的orderby
+        Long courseId = teachplan.getCourseId();
+        // 小节移动是比较同一章节id下的orderby
+        Long parentid = teachplan.getParentid();
+        if ("moveup".equals(moveType)){
+            if (grade==1) {
+                // 章节上移，找到上一个章节的orderby，然后与其交换orderby
+                // SELECT * FROM teachplan WHERE courseId = ? AND grade = 1  AND orderby < 1 ORDER BY orderby DESC LIMIT 1
+                LambdaQueryWrapper<Teachplan> teachplanLambdaQueryWrapper = new LambdaQueryWrapper<>();
+                teachplanLambdaQueryWrapper.eq(Teachplan::getGrade, 1)
+                        .eq(Teachplan::getCourseId, courseId)
+                        .lt(Teachplan::getOrderby, orderby)
+                        .orderByDesc(Teachplan::getOrderby)
+                        .last("LIMIT 1");
+                Teachplan tmp = teachplanMapper.selectOne(teachplanLambdaQueryWrapper);
+                exchangeOrderby(teachplan, tmp);
+            }else if (grade==2){
+                // 小节上移
+                // SELECT * FROM teachplan WHERE parentId = 268 AND orderby < 5 ORDER BY orderby DESC LIMIT 1
+                LambdaQueryWrapper<Teachplan> teachplanLambdaQueryWrapper = new LambdaQueryWrapper<>();
+                teachplanLambdaQueryWrapper.eq(Teachplan::getParentid,parentid)
+                        .lt(Teachplan::getOrderby,orderby)
+                        .orderByDesc(Teachplan::getOrderby)
+                        .last("LIMIT 1");
+                Teachplan tmp = teachplanMapper.selectOne(teachplanLambdaQueryWrapper);
+                exchangeOrderby(teachplan,tmp);
+
+            }
+        } else if ("movedown".equals(moveType)) {
+            if (grade==1){
+                // 章节下移
+                // SELECT * FROM teachplan WHERE courseId = 117 AND grade = 1 AND orderby > 1 ORDER BY orderby ASC LIMIT 1
+                LambdaQueryWrapper<Teachplan> teachplanLambdaQueryWrapper = new LambdaQueryWrapper<>();
+                teachplanLambdaQueryWrapper.eq(Teachplan::getGrade,1)
+                        .eq(Teachplan::getCourseId,courseId)
+                        .gt(Teachplan::getOrderby,orderby)
+                        .orderByAsc(Teachplan::getOrderby)
+                        .last("LIMIT 1");
+                Teachplan tmp = teachplanMapper.selectOne(teachplanLambdaQueryWrapper);
+                exchangeOrderby(teachplan,tmp);
+            } else if (grade==2) {
+                LambdaQueryWrapper<Teachplan> teachplanLambdaQueryWrapper = new LambdaQueryWrapper<>();
+                teachplanLambdaQueryWrapper.eq(Teachplan::getParentid,parentid)
+                        .gt(Teachplan::getOrderby,orderby)
+                        .orderByAsc(Teachplan::getOrderby)
+                        .last("LIMIT 1");
+                Teachplan tmp = teachplanMapper.selectOne(teachplanLambdaQueryWrapper);
+                exchangeOrderby(teachplan,tmp);
+
+            }
+
+        }
+
+    }
+    private void exchangeOrderby(Teachplan teachplan,Teachplan tmp){
+        if (tmp==null){
+            XueChengPlusException.cast("已经到头了，不能在移动了");
+        }else {
+            Integer orderby = teachplan.getOrderby();
+            Integer orderby1 = tmp.getOrderby();
+            teachplan.setOrderby(orderby1);
+            tmp.setOrderby(orderby);
+            teachplanMapper.updateById(tmp);
+            teachplanMapper.updateById(teachplan);
+        }
     }
 }

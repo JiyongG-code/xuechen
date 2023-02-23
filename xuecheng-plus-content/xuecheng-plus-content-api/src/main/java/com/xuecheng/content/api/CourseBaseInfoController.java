@@ -35,7 +35,7 @@ public class CourseBaseInfoController {
 //     如果指定分组，所有的需要验证的属性都必须添加指定分组才会校验，没有指明分组的属性都属于Default，所以分组接口继承Default就可以解决
       public CourseBaseInfoDto createCourseBase(@RequestBody  AddCourseDto addCourseDto){
         //获取当前用户所属培训机构的id
-        Long companyId =22L;
+        Long companyId =1232141425L;
         //调用service
         CourseBaseInfoDto courseBase = courseBaseInfoService.createCourseBase(companyId, addCourseDto);
         return courseBase;

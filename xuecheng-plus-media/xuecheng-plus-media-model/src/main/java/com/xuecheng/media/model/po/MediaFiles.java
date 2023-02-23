@@ -35,6 +35,9 @@ public class MediaFiles implements Serializable {
      */
     private String companyName;
 
+
+    private String filePath;
+
     /**
      * 文件名称
      */
@@ -104,5 +107,10 @@ public class MediaFiles implements Serializable {
      */
     private String auditMind;
 
+
+    /**
+     * 文件大小
+     */
+    private Long fileSize;
 
 }

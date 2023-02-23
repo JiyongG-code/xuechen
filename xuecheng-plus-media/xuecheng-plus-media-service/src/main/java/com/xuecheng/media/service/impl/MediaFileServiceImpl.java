@@ -170,6 +170,7 @@ public class MediaFileServiceImpl implements MediaFileService {
     @Transactional
     //上传到数据库
     public MediaFiles addMediaFilesToDb(Long companyId,String fileId,UploadFileParamsDto uploadFileParamsDto,String bucket,String objectName){
+        //保存到数据库
         MediaFiles mediaFiles = mediaFilesMapper.selectById(fileId);
         if (mediaFiles==null){
             mediaFiles = new MediaFiles();
@@ -179,16 +180,44 @@ public class MediaFileServiceImpl implements MediaFileService {
             mediaFiles.setId(fileId);
             mediaFiles.setFileId(fileId);
             mediaFiles.setCompanyId(companyId);
-            mediaFiles.setFilePath(objectName);
             mediaFiles.setBucket(bucket);
-            mediaFiles.setUrl("/"+bucket+"/"+objectName);
+            mediaFiles.setFilePath(objectName);
+
+            //获取扩展名
+            String extension=null;
+            String filename = uploadFileParamsDto.getFilename();
+            if (StringUtils.isNoneEmpty(filename)&&filename.indexOf(".")>=0){
+                extension=filename.substring(filename.lastIndexOf("."));
+            }
+            //媒体类型
+            String mimeType =getMimeTypeByextension(extension);
+            //图片，mp4视频可以设置url
+            if (mimeType.indexOf("image")>=0||mimeType.indexOf("mp4")>=0){
+                mediaFiles.setUrl("/"+bucket+"/"+objectName);
+            }
             mediaFiles.setCreateDate(LocalDateTime.now());
             mediaFiles.setStatus("1");
             mediaFiles.setAuditStatus("002003");
 
+            //插入文件表
             mediaFilesMapper.insert(mediaFiles);
+
+            //对avi视频添加到待处理任务表
         }
         return mediaFiles;
+    }
+    //根据扩展名拿匹配的媒体类型
+    private String getMimeTypeByextension(String extension){
+        //资源的媒体类型
+        String contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        //默认未知二进制流
+        if (StringUtils.isNoneEmpty(extension)){
+            ContentInfo extensionMatch = ContentInfoUtil.findExtensionMatch(extension);
+            if (extensionMatch!=null){
+                contentType=extensionMatch.getMimeType();
+            }
+        }
+        return contentType;
     }
     private String getFileFolder(Date date, boolean year, boolean month, boolean day) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -365,6 +394,19 @@ public class MediaFileServiceImpl implements MediaFileService {
 
         }
 
+    }
+
+    @Override
+    public MediaFiles getFileById(String id) {
+        MediaFiles mediaFiles = mediaFilesMapper.selectById(id);
+        if (mediaFiles==null){
+            XueChengPlusException.cast("文件不存在");
+        }
+        String url = mediaFiles.getUrl();
+        if (StringUtils.isEmpty(url)){
+            XueChengPlusException.cast("文件还没有处理，请稍后预览");
+        }
+        return mediaFiles;
     }
 
     /***

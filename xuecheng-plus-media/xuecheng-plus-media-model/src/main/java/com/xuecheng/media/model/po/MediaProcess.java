@@ -32,6 +32,8 @@ public class MediaProcess implements Serializable {
      */
     private String filename;
 
+    private String filePath;
+
     /**
      * 存储源
      */
@@ -59,4 +61,12 @@ public class MediaProcess implements Serializable {
     private String url;
 
 
+    /***
+    * @description TODO 失败原因
+    * @param null
+    * @return
+    * @author J1320
+    * @date 2023/2/25 14:48
+    */
+    private String errormsg;
 }

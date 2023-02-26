@@ -10,6 +10,7 @@ import com.xuecheng.media.model.po.MediaFiles;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -103,5 +104,8 @@ public interface MediaFileService {
  * @date 2023/2/23 21:14
  */
  public MediaFiles getFileById(String id);
+
+ public File downloadFileFromMinIO(File file, String bucket, String objectName);
+ public void addMediaFilesToMinIO(String filePath, String bucket, String objectName);
 }
 

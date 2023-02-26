@@ -8,11 +8,13 @@ import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.base.model.PageParams;
 import com.xuecheng.base.model.PageResult;
 import com.xuecheng.media.mapper.MediaFilesMapper;
+import com.xuecheng.media.mapper.MediaProcessMapper;
 import com.xuecheng.media.model.dto.QueryMediaParamsDto;
 import com.xuecheng.media.model.dto.RestResponse;
 import com.xuecheng.media.model.dto.UploadFileParamsDto;
 import com.xuecheng.media.model.dto.UploadFileResultDto;
 import com.xuecheng.media.model.po.MediaFiles;
+import com.xuecheng.media.model.po.MediaProcess;
 import com.xuecheng.media.service.MediaFileService;
 import io.minio.*;
 import lombok.extern.slf4j.Slf4j;
@@ -55,8 +57,14 @@ public class MediaFileServiceImpl implements MediaFileService {
     @Autowired
     MediaFileService currentProxy;
 
+    @Autowired
+    MediaProcessMapper mediaProcessMapper;
+
+
     @Value("${minio.bucket.videofiles}")
     private String bucket_videofiles;
+
+
 
 
     @Override
@@ -123,7 +131,7 @@ public class MediaFileServiceImpl implements MediaFileService {
         return null;
     }
     //将文件上传到文件系统
-    private void addMediaFilesToMinIO(String filePath, String bucket, String objectName){
+    public void addMediaFilesToMinIO(String filePath, String bucket, String objectName){
         try {
             UploadObjectArgs uploadObjectArgs = UploadObjectArgs.builder()
                     .bucket(bucket)
@@ -203,6 +211,13 @@ public class MediaFileServiceImpl implements MediaFileService {
             mediaFilesMapper.insert(mediaFiles);
 
             //对avi视频添加到待处理任务表
+            if (mimeType.equals("video/x-msvideo")){
+                MediaProcess mediaProcess = new MediaProcess();
+                BeanUtils.copyProperties(mediaFiles,mediaProcess);
+                //设置一个状态
+                mediaProcess.setStatus("1");//未处理
+                mediaProcessMapper.insert(mediaProcess);
+            }
         }
         return mediaFiles;
     }
@@ -441,6 +456,7 @@ public class MediaFileServiceImpl implements MediaFileService {
         return chunkFiles;
 
     }
+
     //根据桶和文件路径从minio下载文件
     public File downloadFileFromMinIO(File file,String bucket,String objectName){
         GetObjectArgs getObjectArgs = GetObjectArgs.builder()

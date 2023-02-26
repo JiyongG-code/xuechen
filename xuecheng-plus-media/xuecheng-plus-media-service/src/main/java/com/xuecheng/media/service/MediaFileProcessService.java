@@ -1,0 +1,35 @@
+package com.xuecheng.media.service;
+
+import com.xuecheng.media.model.po.MediaProcess;
+
+import java.util.List;
+
+public interface MediaFileProcessService {
+
+
+    /***
+    * @description TODO
+    * @param shardIndex 分片序号
+     * @param shardTotal 分片总数
+     * @param count  获取记录数
+    * @return java.util.List<com.xuecheng.media.model.po.MediaProcess>
+    * @author J1320
+    * @date 2023/2/24 21:09
+    */
+    public List<MediaProcess> getMediaProcessList(int shardIndex,int shardTotal, int count);
+
+    /***
+    * @description TODO 保存任务结果
+    * @param taskId  任务id
+     * @param status 任务状态
+     * @param fileId 文件id
+     * @param url  url
+     * @param errorMsg 错误信息
+    * @return void
+    * @author J1320
+    * @date 2023/2/24 21:14
+    */
+
+    public void saveProcessFinishStatus(Long taskId,String status,String fileId,String url,String errorMsg);
+
+}

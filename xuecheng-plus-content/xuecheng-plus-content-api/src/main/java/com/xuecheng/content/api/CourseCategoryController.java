@@ -31,6 +31,7 @@ public class CourseCategoryController {
     public List<CourseCategoryTreeDto> queryTreeNodes(){
         List<CourseCategoryTreeDto> courseCategoryTreeDtos = courseCategoryService.queryTreeNodes("1");
         return courseCategoryTreeDtos;
+//        return courseCategoryService.queryTreeNodes();
     }
 
 }

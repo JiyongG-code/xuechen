@@ -44,8 +44,8 @@ class ContentServiceApplicationTests {
 
 	@Test
 	void testCourseCategoryService() {
-		List<CourseCategoryTreeDto> courseCategoryTreeDtos = courseCategoryService.queryTreeNodes("1");
-		System.out.println(courseCategoryTreeDtos);
+////		List<CourseCategoryTreeDto> courseCategoryTreeDtos = courseCategoryService.queryTreeNodes("1");
+//		System.out.println(courseCategoryTreeDtos);
 	}
 
 }

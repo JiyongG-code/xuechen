@@ -22,4 +22,25 @@ public interface CoursePublishService {
     */
 
     public CoursePreviewDto getCoursePreviewInfo(Long courseId);
+
+    /***
+    * @description TODO 提交审核
+    * @param companyId  课程id
+     * @param courseId
+    * @return   void
+    * @author J1320
+    * @date 2023/2/27 18:33
+    */
+    public void commitAudit(Long companyId,Long courseId);
+
+
+    /***
+    * @description TODO 课程发布接口
+    * @param companyId 机构id
+     * @param courseId 课程id
+    * @return void
+    * @author J1320
+    * @date 2023/2/28 17:49
+    */
+    public void publish(Long companyId,Long courseId);
 }

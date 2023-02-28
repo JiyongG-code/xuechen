@@ -14,7 +14,7 @@ import java.util.List;
  * @date 2023/2/18 16:19
  */
 public interface TeachplanService {
-    public List<TeachplanDto> findTeachplayTree(Long courseId);
+    public List<TeachplanDto> findTeachplanTree(Long courseId);
 
     public void saveTeachplan(SaveTeachplanDto dto);
 

@@ -185,7 +185,7 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         CourseCategory courseCategory = courseCategoryMapper.selectById(courseBase.getMt());
         courseBaseInfoDto.setMtName(courseCategory.getName());
         CourseCategory courseCategory1 = courseCategoryMapper.selectById(courseBase.getSt());
-        courseBaseInfoDto.setMtName(courseCategory1.getName());
+        courseBaseInfoDto.setStName(courseCategory1.getName());
 
         return courseBaseInfoDto;
     }

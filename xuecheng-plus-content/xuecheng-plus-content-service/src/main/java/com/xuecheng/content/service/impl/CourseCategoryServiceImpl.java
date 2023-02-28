@@ -24,6 +24,12 @@ public class CourseCategoryServiceImpl implements CourseCategoryService {
     @Autowired
     CourseCategoryMapper courseCategoryMapper;
 
+//    @Override
+//    public List<CourseCategoryTreeDto> queryTreeNodes() {
+//        return courseCategoryMapper.selectTreeNodes();
+//    }
+
+
 
 
     @Override

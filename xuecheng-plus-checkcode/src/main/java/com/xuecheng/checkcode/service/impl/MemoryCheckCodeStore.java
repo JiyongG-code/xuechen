@@ -16,11 +16,14 @@ import java.util.Map;
 @Component("MemoryCheckCodeStore")
 public class MemoryCheckCodeStore implements CheckCodeService.CheckCodeStore {
 
+
+
     Map<String,String> map = new HashMap<String,String>();
 
     @Override
     public void set(String key, String value, Integer expire) {
         map.put(key,value);
+
     }
 
     @Override

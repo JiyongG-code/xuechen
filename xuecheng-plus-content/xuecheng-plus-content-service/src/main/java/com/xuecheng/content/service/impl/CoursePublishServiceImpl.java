@@ -25,8 +25,11 @@ import freemarker.template.TemplateNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
@@ -38,6 +41,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author J1320
@@ -48,6 +52,10 @@ import java.util.List;
 @Slf4j
 @Service
 public class CoursePublishServiceImpl implements CoursePublishService {
+
+    @Autowired
+    RedisTemplate redisTemplate;
+
 
     @Autowired
     CourseBaseInfoService courseBaseInfoService;
@@ -73,6 +81,9 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 
     @Autowired
     MqMessageService mqMessageService;
+
+    @Autowired
+    RedissonClient redissonClient;
 
     @Override
     public CoursePreviewDto getCoursePreviewInfo(Long courseId) {
@@ -272,4 +283,131 @@ public class CoursePublishServiceImpl implements CoursePublishService {
         }
     }
 
+    @Override
+    public CoursePublish getCoursePublish(Long courseId) {
+        CoursePublish coursePublish = coursePublishMapper.selectById(courseId);
+        return coursePublish;
+    }
+
+    //解决缓存穿透
+//    @Override
+//    public CoursePublish getCoursePublishCache(Long courseId) {
+//
+//
+//
+//        //从缓存中查询
+//        Object jsonObj = redisTemplate.opsForValue().get("course:" + courseId);
+//        //缓存中有
+//        if(jsonObj!=null){
+////            System.out.println("=============从缓存中查询=============");
+//            //缓存中有直接返回数据
+//            String jsonString = jsonObj.toString();
+//            if("null".equals(jsonString)){
+//                return null;
+//            }
+//            CoursePublish coursePublish = JSON.parseObject(jsonString, CoursePublish.class);
+//            return coursePublish;
+//        }else{
+//            System.out.println("==查询数据库==");
+//            //从数据库查询
+//            CoursePublish coursePublish = getCoursePublish(courseId);
+////            if(coursePublish!=null){
+//                //查询完成再存储到redis
+//                redisTemplate.opsForValue().set("course:"+courseId,JSON.toJSONString(coursePublish),30, TimeUnit.SECONDS);
+////            }
+//            return coursePublish;
+//        }
+//    }
+
+
+//    //使用同步锁解决缓存击穿
+//    @Override
+//    public CoursePublish getCoursePublishCache(Long courseId) {
+//
+//        //从缓存中查询
+//        Object jsonObj = redisTemplate.opsForValue().get("course:" + courseId);
+//        //缓存中有
+//        if (jsonObj!=null){
+//            System.out.println("===========从缓存中查询");
+//            //缓存中有直接返回数据
+//            String jsonString = jsonObj.toString();
+//            if ("null".equals(jsonString)){
+//                return null;
+//            }
+//            CoursePublish coursePublish = JSON.parseObject(jsonString, CoursePublish.class);
+//            return  coursePublish;
+//        }else {
+//            synchronized (this){
+//                //再次查询以下缓存
+//                //冲缓存中查询
+//                jsonObj= redisTemplate.opsForValue().get("course:"+courseId);
+//                //缓存中有
+//                if (jsonObj!=null){
+//                    //缓存中有直接返回数据
+//                    String jsonString = jsonObj.toString();
+//                    if ("null".equals(jsonString)){
+//                        return null;
+//                    }
+//                    CoursePublish coursePublish = JSON.parseObject(jsonString, CoursePublish.class);
+//                    return  coursePublish;
+//                }
+//                System.out.println("=====查询数据库======");
+//                //从数据库查询
+//                CoursePublish coursePublish = getCoursePublish(courseId);
+//                //查询完成在储存到redis
+//                redisTemplate.opsForValue().set("course:"+courseId,JSON.toJSONString(coursePublish),300,TimeUnit.SECONDS);
+//                return  coursePublish;
+//            }
+//
+//        }
+//
+//
+//    }
+
+
+    //使用redisson实现分布式锁
+    @Override
+    public CoursePublish getCoursePublishCache(Long courseId) {
+
+        //冲缓存中查询
+        Object jsonObj = redisTemplate.opsForValue().get("course:" + courseId);
+        //缓存中有
+        if (jsonObj!=null){
+            //缓存中有直接返回数据
+            String jsonString = jsonObj.toString();
+            if ("null".equals(jsonString)){
+                return  null;
+            }
+            CoursePublish coursePublish = JSON.parseObject(jsonString, CoursePublish.class);
+            return coursePublish;
+        }else {
+            RLock lock = redissonClient.getLock("coursequerylock:" + courseId);
+            //获取分布式锁
+            lock.lock();
+            try {
+                //再次查询以下缓存
+                //从缓存中查询
+                 jsonObj = redisTemplate.opsForValue().get("course:" + courseId);
+                 //缓存中有
+                if(jsonObj!=null){
+                    //缓存中有直接返回数据
+                    String jsonString = jsonObj.toString();
+                    if ("null".equals(jsonString)){
+                        return null;
+                    }
+                    CoursePublish coursePublish = JSON.parseObject(jsonString, CoursePublish.class);
+                    return  coursePublish;
+                }
+                System.out.println("===查询数据库====");
+                //从数据库查询
+                CoursePublish coursePublish = getCoursePublish(courseId);
+                redisTemplate.opsForValue().set("course:"+courseId,JSON.toJSONString(coursePublish),300,TimeUnit.SECONDS);
+                return coursePublish;
+            }finally {
+                //手动释放锁
+                lock.unlock();
+            }
+
+        }
+    }
 }

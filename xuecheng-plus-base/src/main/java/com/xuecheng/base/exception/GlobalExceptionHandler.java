@@ -21,6 +21,9 @@ import java.util.List;
 @Slf4j
 @ControllerAdvice//控制器增强
 public class GlobalExceptionHandler {
+
+
+
     //处理XueChengPlusException，此异常可预知的异常
     @ResponseBody//将信息返回为json格式
     @ExceptionHandler(XueChengPlusException.class)//此方法捕获XueChengPlusException异常

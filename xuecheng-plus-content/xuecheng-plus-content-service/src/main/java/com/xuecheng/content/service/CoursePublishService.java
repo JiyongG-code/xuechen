@@ -1,6 +1,7 @@
 package com.xuecheng.content.service;
 
 import com.xuecheng.content.model.dto.CoursePreviewDto;
+import com.xuecheng.content.model.po.CoursePublish;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -67,4 +68,7 @@ public interface CoursePublishService {
 
     //创建索引
     public Boolean saveCourseIndex(Long courseId) ;
+
+    public CoursePublish getCoursePublish(Long courseId);
+    public CoursePublish getCoursePublishCache(Long courseId);
 }

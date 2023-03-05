@@ -389,6 +389,7 @@ public class MediaFileServiceImpl implements MediaFileService {
             //合并文件的大小
             addMediaFilesToDb(companyId,fileMd5,uploadFileParamsDto,bucket_videofiles,mergeFilePath);
 
+
             return RestResponse.success(true);
 
         }finally {

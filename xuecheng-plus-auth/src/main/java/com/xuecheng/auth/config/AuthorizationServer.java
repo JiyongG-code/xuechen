@@ -24,9 +24,12 @@ import javax.annotation.Resource;
  @EnableAuthorizationServer
  public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
 
+  //自己实现的Token配置，令牌管理服务
   @Resource(name="authorizationServerTokenServicesCustom")
   private AuthorizationServerTokenServices authorizationServerTokenServices;
 
+
+  //spring security默认的身份认证管理器
  @Autowired
  private AuthenticationManager authenticationManager;
 
@@ -34,6 +37,7 @@ import javax.annotation.Resource;
   @Override
   public void configure(ClientDetailsServiceConfigurer clients)
           throws Exception {
+   //因为不需要动态修改，直接在内存中配置了。
         clients.inMemory()// 使用in-memory存储
                 .withClient("XcWebApp")// client_id
 //                .secret("XcWebApp")//客户端密钥
@@ -41,7 +45,7 @@ import javax.annotation.Resource;
                 .resourceIds("xuecheng-plus")//资源列表
                 .authorizedGrantTypes("authorization_code", "password","client_credentials","implicit","refresh_token")// 该client允许的授权类型authorization_code,password,refresh_token,implicit,client_credentials
                 .scopes("all")// 允许的授权范围
-                .autoApprove(false)//false跳转到授权页面
+                .autoApprove(false)//false跳转到授权页面，它可以控制客户端在登录后是否绕过批准询问 (/oauth/confirm_access)。如果设置为true，就不会弹出授权页面，直接跳转到客户端的回调地址.
                 //客户端接收授权码的重定向地址
                 .redirectUris("http://www.xuecheng-plus.com")
    ;

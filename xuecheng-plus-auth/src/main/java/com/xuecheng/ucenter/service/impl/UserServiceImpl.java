@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import java.util.List;
 @Service
 @Slf4j
 public class UserServiceImpl implements UserDetailsService {
+
 
 
     @Autowired
@@ -85,13 +87,13 @@ public class UserServiceImpl implements UserDetailsService {
     public UserDetails getUserPrincipal(XcUserExt user){
         //调用mapper查询数据库得到用户的权限
         List<XcMenu> xcMenus = xcMenuMapper.selectPermissionByUserId(user.getId());
-        String[] authorities ={"p1"};
+        String[] authorities ={"p1"};//默认权限
         ArrayList<String> list = new ArrayList<>();
         xcMenus.forEach(xcMenu -> {
             list.add(xcMenu.getCode());
         });
         if (list.size()>0){
-            authorities = list.toArray(new String[0]);
+            authorities = list.toArray(new String[0]);//这里的String[0]只是一个模板，不是长度。
         }
         String password = user.getPassword();
         //为了安全在令牌中不放密码

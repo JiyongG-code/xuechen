@@ -43,12 +43,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author Mr.M
- * @version 1.0
- * @description 订单相关的接口
- * @date 2023/2/26 10:12
- */
+/***
+* @description TODO订单相关的接口
+* @param null
+* @author J1320
+* @date 2023/3/31 16:11
+*/
 @Slf4j
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -86,6 +86,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public PayRecordDto createOrder(String userId, AddOrderDto addOrderDto) {
 
+        //创建商品订单
         //插入订单表,订单主表，订单明细表
         XcOrders xcOrders = saveXcOrders(userId, addOrderDto);
 
@@ -104,9 +105,10 @@ public class OrderServiceImpl implements OrderService {
         } catch (IOException e) {
             XueChengPlusException.cast("生成二维码出错");
         }
-
+        //封装要返回的数据
         PayRecordDto payRecordDto = new PayRecordDto();
         BeanUtils.copyProperties(payRecord,payRecordDto);
+        //支付二维码
         payRecordDto.setQrcode(qrCode);
 
         return payRecordDto;
@@ -187,7 +189,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void saveAliPayStatus(PayStatusDto payStatusDto){
 
-        String payNo = payStatusDto.getOut_trade_no();
+        String payNo = payStatusDto.getOut_trade_no();//获得商户订单号
         XcPayRecord payRecordByPayno = getPayRecordByPayno(payNo);
         if(payRecordByPayno == null){
             XueChengPlusException.cast("找不到相关的支付记录");
@@ -208,7 +210,7 @@ public class OrderServiceImpl implements OrderService {
         //如果支付成功
         String trade_status = payStatusDto.getTrade_status();//从支付宝查询到的支付结果
         if (trade_status.equals("TRADE_SUCCESS")){//支付宝返回的信息为支付成功
-            //更新支付纪律表的状态为支付成功
+            //更新支付记录表的状态为支付成功
             payRecordByPayno.setStatus("601002");
             //支付宝的订单号
             payRecordByPayno.setOutPayNo(payStatusDto.getTrade_no());
@@ -231,15 +233,7 @@ public class OrderServiceImpl implements OrderService {
 
         }
 
-
-
-
-
-
-
     }
-
-
 
     @Override
     public void notifyPayResult(MqMessage message) {

@@ -74,36 +74,38 @@ public class WxAuthServiceImpl implements AuthService {
     }
 
     @Transactional
-    public XcUser addWxUser(Map userInfo_map){
-        //先去除unionid
-        String unionid = (String)userInfo_map.get("unionid");
-        //根据unioinid查询数据库
-        XcUser xcUser = userMapper.selectOne(new LambdaQueryWrapper<XcUser>().eq(XcUser::getWxUnionid, unionid));
+    public XcUser addWxUser(Map<String,String> userInfo_map){
+        String unionid = userInfo_map.get("unionid");
+        String nickname = userInfo_map.get("nickname");
+        //根据unionid查询用户信息
+        XcUser xcUser = xcUserMapper.selectOne(new LambdaQueryWrapper<XcUser>().eq(XcUser::getWxUnionid, unionid));
         if (xcUser!=null){
-            //该用户在系统存在
-            return xcUser;
+            return  xcUser;
         }
-         xcUser = new XcUser();
-        //用户id
-        String id = UUID.randomUUID().toString();
-        xcUser.setId(id);
-        xcUser.setWxUnionid(unionid);
-        //记录从微信得到的昵称
-        xcUser.setNickname(userInfo_map.get("nickname").toString());
-        xcUser.setUserpic(userInfo_map.get("headimgurl").toString());
-        xcUser.setName(userInfo_map.get("nickname").toString());
+        //向数据库新增记录
+        xcUser=new XcUser();
+        String userId = UUID.randomUUID().toString();
+        xcUser.setId(userId);//主键
         xcUser.setUsername(unionid);
         xcUser.setPassword(unionid);
-        xcUser.setUtype("101001");//学生类型
-        xcUser.setStatus("1");//用户状态
+        xcUser.setWxUnionid(unionid);
+        xcUser.setNickname(nickname);
+        xcUser.setUtype("101001");
+        xcUser.setStatus("1");
         xcUser.setCreateTime(LocalDateTime.now());
-        userMapper.insert(xcUser);
+        //插入
+        int insert = xcUserMapper.insert(xcUser);
+
+        //向用户角色关系表新增记录
         XcUserRole xcUserRole = new XcUserRole();
         xcUserRole.setId(UUID.randomUUID().toString());
-        xcUserRole.setUserId(id);
+        xcUserRole.setUserId(userId);
         xcUserRole.setRoleId("17");//学生角色
+        xcUserRole.setCreateTime(LocalDateTime.now());
         userRoleMapper.insert(xcUserRole);
         return xcUser;
+
+
     }
 
 

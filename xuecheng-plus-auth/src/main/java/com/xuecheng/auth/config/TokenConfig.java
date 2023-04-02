@@ -1,6 +1,7 @@
 package com.xuecheng.auth.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
@@ -10,8 +11,10 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 
 import java.util.Arrays;
+import java.util.Calendar;
 
 /**
  * @author Administrator
@@ -30,13 +33,22 @@ public class TokenConfig {
 
     @Bean
     public TokenStore tokenStore() {
+
         return new JwtTokenStore(accessTokenConverter());
     }
 
+//    @Bean
+//    public TokenStore  rtokenStore(){
+//        return  new RedisTokenStore();
+//
+//        }
+
     @Bean
     public JwtAccessTokenConverter accessTokenConverter() {
+        //在 JWT 编码的令牌值和 OAuth 身份验证信息（双向）之间进行转换的帮助程序。在授予令牌时还充当令牌增强器。
         JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
         converter.setSigningKey(SIGNING_KEY);
+        
         return converter;
     }
 

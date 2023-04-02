@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
  * @date 2023/3/4 13:24
  */
 @Service("password_authservice")
-public class PasswordAuthServiceImpl implements AuthService {
+public class  PasswordAuthServiceImpl implements AuthService {
 
     @Autowired
     XcUserMapper xcUserMapper;
@@ -67,11 +67,8 @@ public class PasswordAuthServiceImpl implements AuthService {
 
         XcUserExt xcUserExt = new XcUserExt();
         BeanUtils.copyProperties(user,xcUserExt);
-
         //校验密码
         //取出数据库存储得正确密码
-
-
         return xcUserExt;
     }
 }

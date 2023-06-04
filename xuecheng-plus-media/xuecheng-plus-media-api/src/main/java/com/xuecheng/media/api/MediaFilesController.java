@@ -57,7 +57,7 @@ public class MediaFilesController {
    uploadFileParamsDto.setFileType("001003");
   }
   uploadFileParamsDto.setFilename(filedata.getOriginalFilename());//文件名
-  UploadFileResultDto uploadFileResultDto =null;
+  UploadFileResultDto uploadFileResultDto =new UploadFileResultDto();
   try {
    uploadFileResultDto = mediaFileService.uploadFile(companyId, uploadFileParamsDto, filedata.getBytes(), folder, objectName);
   }catch (Exception e){
